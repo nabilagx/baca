@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Petualangan Kata: Belajar Membaca 2 Suku Kata</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        fredoka: ['Fredoka', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            teal: '#0d9488',
+                            emerald: '#059669',
+                            sky: '#0284c7',
+                            indigo: '#4f46e5',
+                            mint: '#d1fae5',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            background: #0f172a;
+        }
+        .font-game {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        /* Anti-Pasaran Custom UI Styles & Glassmorphism */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+        }
+
+        /* 3D Tactile Buttons & Letter Tiles */
+        .tile-tactile {
+            background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+            box-shadow: 0 6px 0 #0369a1, 0 10px 20px rgba(2, 132, 199, 0.35);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tile-tactile:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0369a1, 0 4px 10px rgba(2, 132, 199, 0.2);
+        }
+
+        .slot-inset {
+            background: #e2e8f0;
+            box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.12), 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+
+        /* Ambient Animated Blobs */
+        .blob-1 {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 45vw;
+            height: 45vw;
+            background: radial-gradient(circle, rgba(13,148,136,0.25) 0%, rgba(2,132,199,0) 70%);
+            filter: blur(60px);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .blob-2 {
+            position: fixed;
+            bottom: -10%;
+            right: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(79,70,229,0.2) 0%, rgba(5,150,105,0) 70%);
+            filter: blur(70px);
+            z-index: 0;
+            pointer-events: none;
+        }
+        
+        /* Drag and Drop Visual Feedback */
+        .dragging {
+            opacity: 0.3;
+            transform: scale(0.9) rotate(-5deg);
+        }
+        .drag-over {
+            border-color: #0284c7 !important;
+            background-color: #e0f2fe !important;
+            transform: scale(1.08);
+        }
+        
+        @keyframes wobble {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+        .animate-wobble {
+            animation: wobble 0.4s ease-in-out;
+        }
+
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen text-slate-800 flex flex-col justify-between overflow-x-hidden relative">
+
+    <!-- Ambient Background Lighting -->
+    <div class="blob-1"></div>
+    <div class="blob-2"></div>
+
+    <!-- Confetti Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- HEADER BAR -->
+    <header class="relative z-40 px-4 py-4">
+        <div class="max-w-4xl mx-auto glass-panel rounded-3xl px-5 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="goToScreen('spin')">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-teal-400 via-sky-500 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-teal-500/30">
+                    <i class="fa-solid fa-shapes text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-game text-2xl font-bold bg-gradient-to-r from-teal-600 via-sky-600 to-indigo-600 bg-clip-text text-transparent tracking-wide">
+                        KataPintar <span class="text-xs px-2 py-0.5 rounded-full bg-teal-100 text-teal-800 font-sans font-bold">KV-KV</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 font-medium hidden sm:block">Belajar Membaca 2 Suku Kata Dasar</p>
+                </div>
+            </div>
+
+            <!-- Header Controls -->
+            <div class="flex items-center gap-3">
+                <div class="bg-amber-500/10 border border-amber-400/30 px-3.5 py-1.5 rounded-2xl flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-star text-amber-500 text-lg animate-pulse"></i>
+                    <span id="starScore" class="font-game font-extrabold text-amber-600 text-lg">0</span>
+                </div>
+
+                <button id="btnSoundToggle" onclick="toggleSound()" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center transition-all shadow-sm">
+                    <i id="soundIcon" class="fa-solid fa-volume-high"></i>
+                </button>
+
+                <button onclick="goToScreen('spin')" title="Putar Ulang Roda" class="px-4 py-2 text-xs md:text-sm font-bold rounded-2xl bg-teal-500 text-white hover:bg-teal-600 transition-all flex items-center gap-1.5 shadow-md shadow-teal-500/20">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span class="hidden sm:inline">Roda Kategori</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="relative z-10 max-w-4xl mx-auto w-full px-4 py-4 flex-grow flex flex-col justify-center">
+
+        <!-- ================= SCREEN 1: SPIN WHEEL ================= -->
+        <section id="screenSpin" class="flex flex-col items-center justify-center space-y-6">
+            <div class="text-center space-y-2">
+                <span class="px-3.5 py-1 rounded-full bg-emerald-400/20 text-emerald-300 border border-emerald-400/30 text-xs font-bold tracking-wider uppercase">Langkah 1</span>
+                <h2 class="font-game text-3xl md:text-5xl font-extrabold text-white drop-shadow-md">Putar Roda Kategori!</h2>
+                <p class="text-slate-300 text-sm md:text-base max-w-md mx-auto">Pilih tema kata dasar 2 suku kata sederhana (KV-KV) untuk dibaca.</p>
+            </div>
+
+            <!-- Wheel Container -->
+            <div class="relative flex items-center justify-center py-2">
+                <!-- Pointer with recoil animation -->
+                <div id="wheelNeedle" class="absolute -top-3 z-20 text-amber-400 drop-shadow-[0_4px_10px_rgba(251,191,36,0.6)] text-4xl transition-transform duration-75">
+                    <i class="fa-solid fa-location-pin fa-rotate-180"></i>
+                </div>
+
+                <!-- Canvas Wheel -->
+                <canvas id="wheelCanvas" width="360" height="360" class="max-w-full drop-shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-full"></canvas>
+            </div>
+
+            <!-- Spin Button -->
+            <button id="btnSpin" onclick="spinWheel()" class="font-game text-lg md:text-xl px-12 py-4 rounded-3xl bg-gradient-to-r from-emerald-400 via-teal-500 to-sky-500 text-white font-extrabold shadow-xl shadow-teal-500/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
+                <i class="fa-solid fa-arrows-spin text-2xl"></i>
+                <span>PUTAR RODA SEKARANG!</span>
+            </button>
+        </section>
+
+        <!-- ================= SCREEN 2: GAME SETTINGS / SETUP ================= -->
+        <section id="screenSettings" class="hidden flex-col items-center justify-center space-y-6 max-w-lg mx-auto w-full">
+            <div class="text-center space-y-2">
+                <span class="px-3.5 py-1 rounded-full bg-sky-400/20 text-sky-300 border border-sky-400/30 text-xs font-bold tracking-wider uppercase">Langkah 2</span>
+                <h2 class="font-game text-3xl md:text-4xl font-extrabold text-white">Pengaturan Belajar</h2>
+                <p class="text-slate-300 text-sm">Sesuaikan tipe kata dan tingkat kesulitan anak.</p>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-6 shadow-2xl w-full space-y-5">
+                <!-- Category Result Badge -->
+                <div class="p-4 rounded-2xl bg-gradient-to-r from-teal-500/10 to-sky-500/10 border border-teal-500/30 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-teal-600 uppercase tracking-wider">Kategori Terpilih</p>
+                        <h3 id="selectedCategoryTitle" class="font-game text-2xl font-extrabold text-teal-900 capitalize">Hewan 🐶</h3>
+                    </div>
+                    <button onclick="goToScreen('spin')" class="text-xs font-bold text-teal-700 underline hover:text-teal-900">Ganti Kategori</button>
+                </div>
+
+                <!-- Syllable Pattern Mode -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        <i class="fa-solid fa-spell-check text-teal-600 mr-1"></i> Pola Suku Kata:
+                    </label>
+                    <div class="grid grid-cols-2 gap-2" id="patternOptions">
+                        <button type="button" data-pattern="KVKV" class="btn-pattern active py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all border-teal-500 bg-teal-50 text-teal-800 flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-teal-600"></i>
+                            <span>KV-KV Murni (Ku-da)</span>
+                        </button>
+                        <button type="button" data-pattern="ALL" class="btn-pattern py-2.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-circle text-slate-300"></i>
+                            <span>Campuran (Ku-cing)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Alphabet Range Filter -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        <i class="fa-solid fa-arrow-down-a-z text-sky-600 mr-1"></i> Rentang Abjad Awalan:
+                    </label>
+                    <div class="grid grid-cols-2 gap-2" id="alphabetOptions">
+                        <button type="button" data-range="ALL" class="btn-abjad active py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all border-sky-500 bg-sky-50 text-sky-800">
+                            Semua Abjad (A - Z)
+                        </button>
+                        <button type="button" data-range="A-G" class="btn-abjad py-2.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50">
+                            Abjad A - G
+                        </button>
+                        <button type="button" data-range="H-N" class="btn-abjad py-2.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50">
+                            Abjad H - N
+                        </button>
+                        <button type="button" data-range="O-Z" class="btn-abjad py-2.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50">
+                            Abjad O - Z
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Difficulty Filter -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                        <i class="fa-solid fa-layer-group text-indigo-600 mr-1"></i> Tingkat Kesulitan Rumpang:
+                    </label>
+                    <div class="space-y-2" id="difficultyOptions">
+                        <button type="button" data-diff="easy" class="btn-diff active w-full text-left p-3 rounded-2xl border border-emerald-500 bg-emerald-50 text-emerald-900 flex items-center justify-between">
+                            <div>
+                                <p class="font-bold text-sm">🟢 Mudah (1 Suku Kata Hilang)</p>
+                                <p class="text-xs text-emerald-700">Contoh rumpang: [ KU ] [ _ _ ] -> anak isi 'DA'</p>
+                            </div>
+                            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+                        </button>
+
+                        <button type="button" data-diff="medium" class="btn-diff w-full text-left p-3 rounded-2xl border border-slate-200 text-slate-700 flex items-center justify-between hover:bg-slate-50">
+                            <div>
+                                <p class="font-bold text-sm">🟡 Sedang (Huruf Vokal Hilang)</p>
+                                <p class="text-xs text-slate-500">Contoh rumpang: K _ D _ -> anak isi 'U' dan 'A'</p>
+                            </div>
+                            <i class="fa-solid fa-circle-check text-slate-300"></i>
+                        </button>
+
+                        <button type="button" data-diff="hard" class="btn-diff w-full text-left p-3 rounded-2xl border border-slate-200 text-slate-700 flex items-center justify-between hover:bg-slate-50">
+                            <div>
+                                <p class="font-bold text-sm">🔴 Sulit (Susun Semua Huruf)</p>
+                                <p class="text-xs text-slate-500">Contoh rumpang: _ _ _ _ -> susun kata dari awal</p>
+                            </div>
+                            <i class="fa-solid fa-circle-check text-slate-300"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Start Game Button -->
+                <button onclick="startGame()" class="font-game w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold text-lg shadow-xl shadow-indigo-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    MULAI PERMAINAN KATA 🚀
+                </button>
+            </div>
+        </section>
+
+        <!-- ================= SCREEN 3: GAMEPLAY BOARD ================= -->
+        <section id="screenPlay" class="hidden flex-col items-center space-y-5 w-full">
+            
+            <!-- Top Status Bar -->
+            <div class="w-full flex items-center justify-between glass-panel px-5 py-3 rounded-2xl">
+                <div class="flex items-center gap-2">
+                    <span id="badgeCat" class="px-3 py-1 rounded-xl bg-teal-500 text-white font-bold text-xs capitalize shadow-sm">Hewan</span>
+                    <span id="badgeDiff" class="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-800 font-bold text-xs capitalize border border-emerald-200">Mudah</span>
+                </div>
+                <div class="text-xs font-bold text-slate-600">
+                    Kata <span id="currentWordIndex" class="text-teal-600 font-extrabold text-sm">1</span> dari <span id="totalWordsCount" class="text-slate-800 font-bold">10</span>
+                </div>
+            </div>
+
+            <!-- Clue Card (Ciri-Ciri Kata) -->
+            <div class="glass-panel rounded-3xl p-6 shadow-xl w-full relative overflow-hidden space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-200/60 pb-3">
+                    <span class="text-xs font-extrabold tracking-wider text-teal-700 uppercase flex items-center gap-2">
+                        <i class="fa-solid fa-lightbulb text-amber-500 text-sm"></i> Petunjuk Ciri-Ciri (Dibacakan Guru/Orang Tua):
+                    </span>
+                    
+                    <!-- Read Aloud Button -->
+                    <button onclick="readClueAloud()" class="px-3.5 py-1.5 rounded-xl bg-sky-500 text-white hover:bg-sky-600 text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-sky-500/20">
+                        <i class="fa-solid fa-volume-high"></i>
+                        <span>Bacakan Suara</span>
+                    </button>
+                </div>
+
+                <!-- Clue Text -->
+                <p id="clueText" class="text-lg md:text-2xl font-bold text-slate-800 leading-relaxed text-center py-2">
+                    "Kakinya ada 4, larinya sangat cepat, dan suka menarik delman."
+                </p>
+
+                <!-- Optional Emoji Hint Toggle -->
+                <div class="pt-2 flex items-center justify-between">
+                    <button onclick="toggleEmojiHint()" class="text-xs font-bold text-slate-500 hover:text-teal-700 flex items-center gap-1.5">
+                        <i class="fa-regular fa-eye text-teal-500"></i>
+                        <span id="hintToggleText">Tampilkan Bantuan Gambar (Emoji)</span>
+                    </button>
+
+                    <div id="emojiHintContainer" class="hidden text-4xl animate-bounce-short">
+                        <!-- Emoji placed here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Word Target Slots (Tempat Rumpang) -->
+            <div class="w-full glass-panel p-6 rounded-3xl space-y-4 flex flex-col items-center shadow-xl">
+                <p class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Lengkapi Kotak Rumpang Suku Kata:</p>
+
+                <!-- Syllable Helper Labels -->
+                <div id="syllableLabels" class="flex gap-4 text-xs font-bold text-teal-800">
+                    <!-- Syllables header -->
+                </div>
+
+                <!-- Letter Target Boxes -->
+                <div id="targetSlotsContainer" class="flex items-center justify-center gap-3 md:gap-5 py-2 flex-wrap">
+                    <!-- Dynamic Letter Slots -->
+                </div>
+            </div>
+
+            <!-- Letter Tiles Selection Bank -->
+            <div class="w-full glass-panel p-6 rounded-3xl shadow-xl space-y-4">
+                <div class="flex items-center justify-between">
+                    <p class="text-xs font-extrabold text-slate-500 uppercase tracking-wider">Pilihan Huruf (Tarik atau Klik Huruf):</p>
+                    <button onclick="resetWordSlots()" class="text-xs font-bold text-slate-500 hover:text-red-500 transition-colors">
+                        <i class="fa-solid fa-rotate-left mr-1"></i>Bersihkan Kotak
+                    </button>
+                </div>
+
+                <!-- Letter Bank Container -->
+                <div id="letterBankContainer" class="flex items-center justify-center gap-3 md:gap-4 flex-wrap min-h-[75px]">
+                    <!-- Dynamic 3D Letter Tiles -->
+                </div>
+            </div>
+
+            <!-- Gameplay Action Buttons -->
+            <div class="flex items-center gap-3 w-full max-w-md">
+                <button onclick="skipWord()" class="flex-1 py-3.5 px-4 rounded-2xl bg-slate-200 text-slate-700 font-bold text-sm hover:bg-slate-300 transition-all">
+                    <i class="fa-solid fa-forward mr-1"></i> Lewati
+                </button>
+                <button id="btnCheckAnswer" onclick="checkAnswer()" class="flex-2 py-3.5 px-6 rounded-2xl font-game font-extrabold text-lg bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    PERIKSA JAWABAN ✨
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 py-4 px-4 text-center text-xs text-slate-400">
+        <p>Media Pembelajaran Membaca 2 Suku Kata • Khusus Pola Dasar KV-KV Bahasa Indonesia</p>
+    </footer>
+
+    <!-- ================= VICTORY MODAL ================= -->
+    <div id="victoryModal" class="hidden fixed inset-0 bg-slate-950/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-panel rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl animate-bounce-short">
+            <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-inner border border-emerald-400/30">
+                <i class="fa-solid fa-star"></i>
+            </div>
+
+            <div class="space-y-1">
+                <h3 class="font-game text-3xl font-extrabold text-slate-800">HEBAT SEKALI! 🎉</h3>
+                <p class="text-slate-500 text-sm font-semibold">Kamu berhasil membaca kata ini!</p>
+            </div>
+
+            <!-- Revealed Word Info Box -->
+            <div class="bg-gradient-to-r from-teal-50 to-sky-50 border border-teal-200 p-4 rounded-2xl space-y-2">
+                <div id="modalEmoji" class="text-5xl">🐴</div>
+                <h4 id="modalWord" class="font-game text-4xl font-extrabold tracking-widest text-teal-800 uppercase">KUDA</h4>
+                <div id="modalSyllables" class="inline-block px-4 py-1.5 bg-white rounded-full border border-teal-200 text-sm font-extrabold text-teal-700 shadow-sm">
+                    ku - da
+                </div>
+            </div>
+
+            <button onclick="nextWord()" class="font-game w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-extrabold text-lg shadow-xl shadow-emerald-500/30 hover:scale-105 transition-all">
+                KATA BERIKUTNYA ➡️
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        /* ================= STRICT KV-KV VOCABULARY DATASET ================= */
+        // Explicitly separated: KV-KV (Kafeka - Pure Open Syllables) vs Mixed
+        const WORD_DATABASE = [
+            // HEWAN (Pola KV-KV Murni)
+            { word: "kuda", category: "hewan", pattern: "KVKV", syllables: ["ku", "da"], clue: "Hewan berkaki empat yang berlari sangat cepat dan suka menarik delman.", emoji: "🐴" },
+            { word: "sapi", category: "hewan", pattern: "KVKV", syllables: ["sa", "pi"], clue: "Hewan ternak berkaki empat penghasil susu segar yang suaranya 'mooo'.", emoji: "🐄" },
+            { word: "kera", category: "hewan", pattern: "KVKV", syllables: ["ke", "ra"], clue: "Hewan yang suka melompat di pohon dan sangat gemar makan pisang.", emoji: "🐒" },
+            { word: "rusa", category: "hewan", syllables: ["ru", "sa"], pattern: "KVKV", clue: "Hewan anggun di hutan yang punya tanduk indah bercabang.", emoji: "🦌" },
+            { word: "singa", category: "hewan", syllables: ["si", "nga"], pattern: "KVKV", clue: "Raja hutan yang perkasa dan memiliki rambut surai di kepala.", emoji: "🦁" },
+            { word: "naga", category: "hewan", syllables: ["na", "ga"], pattern: "KVKV", clue: "Hewan dongeng berkulit sisik yang bisa mengeluarkan api.", emoji: "🐉" },
+            { word: "lele", category: "hewan", syllables: ["le", "le"], pattern: "KVKV", clue: "Ikan air tawar kumis panjang yang badannya licin.", emoji: "🐟" },
+            { word: "kura", category: "hewan", syllables: ["ku", "ra"], pattern: "KVKV", clue: "Hewan berjalan lambat yang membawa rumah tempurung keras.", emoji: "🐢" },
+
+            // BENDA (Pola KV-KV Murni)
+            { word: "buku", category: "benda", pattern: "KVKV", syllables: ["bu", "ku"], clue: "Benda dari kertas tempat kita menulis dan membaca pelajaran.", emoji: "📚" },
+            { word: "meja", category: "benda", pattern: "KVKV", syllables: ["me", "ja"], clue: "Perabot kayu tempat meletakkan buku saat kita belajar.", emoji: "🪵" },
+            { word: "bola", category: "benda", pattern: "KVKV", syllables: ["bo", "la"], clue: "Benda bulat empuk yang ditendang di lapangan sepak bola.", emoji: "⚽" },
+            { word: "sapu", category: "benda", pattern: "KVKV", syllables: ["sa", "pu"], clue: "Alat rumah tangga untuk membersihkan debu di lantai.", emoji: "🧹" },
+            { word: "roda", category: "benda", pattern: "KVKV", syllables: ["ro", "da"], clue: "Benda bulat melingkar yang berputar pada sepeda atau mobil.", emoji: "🛞" },
+            { word: "topi", category: "benda", pattern: "KVKV", syllables: ["to", "pi"], clue: "Alat penutup kepala agar kita tidak kepanasan di luar.", emoji: "🧢" },
+            { word: "baju", category: "benda", pattern: "KVKV", syllables: ["ba", "ju"], clue: "Pakaian yang kita pakai di badan setiap hari.", emoji: "👕" },
+            { word: "paku", category: "benda", pattern: "KVKV", syllables: ["pa", "ku"], clue: "Benda besi tajam yang dipukul palu untuk menempel kayu.", emoji: "📌" },
+            { word: "tali", category: "benda", pattern: "KVKV", syllables: ["ta", "li"], clue: "Alat panjang untuk mengikat barang atau main lompat tali.", emoji: "🪢" },
+            { word: "kaca", category: "benda", pattern: "KVKV", syllables: ["ka", "ca"], clue: "Benda bening tempat kita melihat bayangan muka saat berdandan.", emoji: "🪞" },
+            { word: "pita", category: "benda", pattern: "KVKV", syllables: ["pi", "ta"], clue: "Hiasan kain cantik berwarna-warni untuk mengikat rambut.", emoji: "🎀" },
+
+            // BUAH & MAKANAN (Pola KV-KV Murni)
+            { word: "roti", category: "buah", pattern: "KVKV", syllables: ["ro", "ti"], clue: "Makanan empuk dari tepung yang lezat dimakan saat sarapan.", emoji: "🍞" },
+            { word: "susu", category: "buah", pattern: "KVKV", syllables: ["su", "su"], clue: "Minuman sehat berwarna putih yang membuat tubuh kuat.", emoji: "🥛" },
+            { word: "keju", category: "buah", pattern: "KVKV", syllables: ["ke", "ju"], clue: "Makanan gurih berwarna kuning kesukaan tikus.", emoji: "🧀" },
+            { word: "tahu", category: "buah", pattern: "KVKV", syllables: ["ta", "hu"], clue: "Makanan lembut berwarna putih berbahan kacang kedelai.", emoji: "🧊" },
+            { word: "sawo", category: "buah", pattern: "KVKV", syllables: ["sa", "wo"], clue: "Buah manis berwarna cokelat berbentuk bulat kecil.", emoji: "🥔" },
+            { word: "duku", category: "buah", pattern: "KVKV", syllables: ["du", "ku"], clue: "Buah bulat kecil manis bergerombol berkulit tipis.", emoji: "🍒" },
+            { word: "gula", category: "buah", pattern: "KVKV", syllables: ["gu", "la"], clue: "Bumbu dapur berasa sangat manis untuk campuran teh.", emoji: "🍬" },
+
+            // ANGGOTA TUBUH (Pola KV-KV Murni)
+            { word: "mata", category: "tubuh", pattern: "KVKV", syllables: ["ma", "ta"], clue: "Indra di wajah yang berguna untuk melihat dunia.", emoji: "👁️" },
+            { word: "pipi", category: "tubuh", pattern: "KVKV", syllables: ["pi", "pi"], clue: "Bagian lembut di wajah di sebelah kanan dan kiri hidung.", emoji: "☺️" },
+            { word: "gigi", category: "tubuh", pattern: "KVKV", syllables: ["gi", "gi"], clue: "Benda putih di dalam mulut untuk mengunyah makanan.", emoji: "🦷" },
+            { word: "dada", category: "tubuh", pattern: "KVKV", syllables: ["da", "da"], clue: "Bagian tubuh bagian depan di atas perut.", emoji: "🫁" },
+            { word: "kaki", category: "tubuh", pattern: "KVKV", syllables: ["ka", "ki"], clue: "Anggota tubuh bagian bawah untuk berdiri dan berjalan.", emoji: "🦶" },
+            { word: "jari", category: "tubuh", pattern: "KVKV", syllables: ["ja", "ri"], clue: "Bagian tangan yang ada 5 di kanan dan 5 di kiri.", emoji: "🖐️" },
+            { word: "bahu", category: "tubuh", pattern: "KVKV", syllables: ["ba", "hu"], clue: "Bagian tubuh di antara leher dan lengan.", emoji: "🤷" },
+            { word: "dagu", category: "tubuh", pattern: "KVKV", syllables: ["da", "gu"], clue: "Bagian wajah paling bawah di bawah mulut.", emoji: "🙂" },
+
+            // ALAM (Pola KV-KV Murni)
+            { word: "batu", category: "alam", pattern: "KVKV", syllables: ["ba", "tu"], clue: "Benda alam yang keras di sungai atau pinggir jalan.", emoji: "🪨" },
+            { word: "kayu", category: "alam", pattern: "KVKV", syllables: ["ka", "yu"], clue: "Bahan keras berasal dari batang pohon untuk buat meja.", emoji: "🪵" },
+            { word: "desa", category: "alam", pattern: "KVKV", syllables: ["de", "sa"], clue: "Tempat asri yang banyak sawah dan udaranya sejuk.", emoji: "🏡" },
+            { word: "kota", category: "alam", pattern: "KVKV", syllables: ["ko", "ta"], clue: "Tempat ramai yang banyak gedung tinggi dan kendaraan.", emoji: "🏙️" },
+
+            // POLA CAMPURAN (KVK / Akhiran Mati - Opsional Lanjutan)
+            { word: "kucing", category: "hewan", pattern: "MIXED", syllables: ["ku", "cing"], clue: "Hewan peliharaan lucu berbulu halus yang bersuara 'meong'.", emoji: "🐱" },
+            { word: "gajah", category: "hewan", pattern: "MIXED", syllables: ["ga", "jah"], clue: "Hewan raksasa berbelalai panjang dan berkuping lebar.", emoji: "🐘" },
+            { word: "pintu", category: "benda", pattern: "MIXED", syllables: ["pin", "tu"], clue: "Bagian rumah yang dibuka tutup untuk keluar masuk.", emoji: "🚪" }
+        ];
+
+        /* ================= SOUND SYNTHESIZER ================= */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.muted = false;
+            }
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+            playTick() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.03);
+                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.03);
+            }
+            playPop() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(450, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(900, this.ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
+            playSuccess() {
+                if (this.muted) return;
+                this.init();
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.18, this.ctx.currentTime + idx * 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(this.ctx.currentTime + idx * 0.08);
+                    osc.stop(this.ctx.currentTime + idx * 0.08 + 0.25);
+                });
+            }
+            playError() {
+                if (this.muted) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(100, this.ctx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.2);
+            }
+        }
+
+        const audioFX = new SoundEngine();
+
+        function toggleSound() {
+            audioFX.muted = !audioFX.muted;
+            const icon = document.getElementById('soundIcon');
+            icon.className = audioFX.muted ? 'fa-solid fa-volume-xmark text-red-500' : 'fa-solid fa-volume-high text-slate-600';
+        }
+
+        /* ================= GAME STATE MANAGEMENT ================= */
+        const CATEGORIES = [
+            { id: "hewan", title: "Hewan 🐶", color: "#059669" },
+            { id: "benda", title: "Benda 🎒", color: "#0284c7" },
+            { id: "buah", title: "Buah & Makanan 🍎", color: "#0d9488" },
+            { id: "tubuh", title: "Anggota Tubuh 👁️", color: "#4f46e5" },
+            { id: "alam", title: "Alam 🌿", color: "#16a34a" }
+        ];
+
+        let state = {
+            screen: "spin",
+            score: 0,
+            selectedCategory: CATEGORIES[0],
+            syllablesPattern: "KVKV", // KVKV (Super Dasar) or ALL
+            alphabetRange: "ALL",     // ALL, A-G, H-N, O-Z
+            difficulty: "easy",       // easy, medium, hard
+            filteredWords: [],
+            currentWordIdx: 0,
+            activeWordObj: null,
+            targetSlotsState: [],
+            draggedLetter: null
+        };
+
+        /* ================= WHEEL SPIN CANVAS SYSTEM ================= */
+        const canvas = document.getElementById('wheelCanvas');
+        const ctx = canvas.getContext('2d');
+        let currentAngle = 0;
+        let isSpinning = false;
+
+        function drawWheel() {
+            const numSlices = CATEGORIES.length;
+            const sliceAngle = (2 * Math.PI) / numSlices;
+            const radius = canvas.width / 2;
+            const centerX = radius;
+            const centerY = radius;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (let i = 0; i < numSlices; i++) {
+                const angle = currentAngle + i * sliceAngle;
+                
+                // Radial Gradient Slices
+                const grad = ctx.createRadialGradient(centerX, centerY, 10, centerX, centerY, radius);
+                grad.addColorStop(0, "#ffffff");
+                grad.addColorStop(0.3, CATEGORIES[i].color);
+                grad.addColorStop(1, CATEGORIES[i].color);
+
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                ctx.arc(centerX, centerY, radius - 8, angle, angle + sliceAngle);
+                ctx.closePath();
+                ctx.fillStyle = grad;
+                ctx.fill();
+                ctx.lineWidth = 5;
+                ctx.strokeStyle = "#ffffff";
+                ctx.stroke();
+
+                // Slice Text
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(angle + sliceAngle / 2);
+                ctx.textAlign = "right";
+                ctx.fillStyle = "#ffffff";
+                ctx.shadowColor = "rgba(0,0,0,0.4)";
+                ctx.shadowBlur = 4;
+                ctx.font = "bold 17px 'Fredoka', sans-serif";
+                ctx.fillText(CATEGORIES[i].title, radius - 24, 6);
+                ctx.restore();
+            }
+
+            // Outer Ring
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius - 4, 0, 2 * Math.PI);
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.stroke();
+
+            // Center Pin
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 28, 0, 2 * Math.PI);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = "#cbd5e1";
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 14, 0, 2 * Math.PI);
+            ctx.fillStyle = "#0f172a";
+            ctx.fill();
+        }
+
+        function spinWheel() {
+            if (isSpinning) return;
+            isSpinning = true;
+            document.getElementById('btnSpin').disabled = true;
+
+            const totalRounds = 6 + Math.random() * 4;
+            const targetExtraAngle = Math.random() * 2 * Math.PI;
+            
+            let velocity = 0.28 + Math.random() * 0.08;
+            let lastSegmentIdx = -1;
+
+            function animateSpin() {
+                if (velocity > 0.002) {
+                    currentAngle += velocity;
+                    velocity *= 0.985;
+
+                    const sliceAngle = (2 * Math.PI) / CATEGORIES.length;
+                    const normalizedAngle = (2 * Math.PI - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
+                    const pointerAngle = (normalizedAngle + Math.PI / 2) % (2 * Math.PI);
+                    const currentSegment = Math.floor(pointerAngle / sliceAngle) % CATEGORIES.length;
+
+                    if (currentSegment !== lastSegmentIdx) {
+                        audioFX.playTick();
+                        lastSegmentIdx = currentSegment;
+                        
+                        // Recoil Needle visual animation
+                        const needle = document.getElementById('wheelNeedle');
+                        needle.style.transform = 'rotate(-15deg)';
+                        setTimeout(() => needle.style.transform = 'rotate(0deg)', 60);
+                    }
+
+                    drawWheel();
+                    requestAnimationFrame(animateSpin);
+                } else {
+                    isSpinning = false;
+                    document.getElementById('btnSpin').disabled = false;
+
+                    const sliceAngle = (2 * Math.PI) / CATEGORIES.length;
+                    const normalizedAngle = (2 * Math.PI - (currentAngle % (2 * Math.PI))) % (2 * Math.PI);
+                    const pointerAngle = (normalizedAngle + Math.PI / 2) % (2 * Math.PI);
+                    const winningIdx = Math.floor(pointerAngle / sliceAngle) % CATEGORIES.length;
+
+                    state.selectedCategory = CATEGORIES[winningIdx];
+                    audioFX.playSuccess();
+
+                    setTimeout(() => {
+                        showSettingsScreen();
+                    }, 700);
+                }
+            }
+            requestAnimationFrame(animateSpin);
+        }
+
+        /* ================= NAVIGATION & FILTERS ================= */
+        function goToScreen(screenName) {
+            state.screen = screenName;
+            document.getElementById('screenSpin').classList.add('hidden');
+            document.getElementById('screenSettings').classList.add('hidden');
+            document.getElementById('screenPlay').classList.add('hidden');
+
+            if (screenName === 'spin') {
+                document.getElementById('screenSpin').classList.remove('hidden');
+                drawWheel();
+            } else if (screenName === 'settings') {
+                document.getElementById('screenSettings').classList.remove('hidden');
+            } else if (screenName === 'play') {
+                document.getElementById('screenPlay').classList.remove('hidden');
+            }
+        }
+
+        function showSettingsScreen() {
+            document.getElementById('selectedCategoryTitle').innerText = state.selectedCategory.title;
+            goToScreen('settings');
+        }
+
+        // Syllable Pattern Listener
+        document.querySelectorAll('#patternOptions .btn-pattern').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#patternOptions .btn-pattern').forEach(b => {
+                    b.className = "btn-pattern py-2.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50 flex items-center justify-center gap-1.5";
+                    b.querySelector('i').className = "fa-solid fa-circle text-slate-300";
+                });
+                btn.className = "btn-pattern active py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all border-teal-500 bg-teal-50 text-teal-800 flex items-center justify-center gap-1.5";
+                btn.querySelector('i').className = "fa-solid fa-circle-check text-teal-600";
+                state.syllablesPattern = btn.dataset.pattern;
+                audioFX.playPop();
+            });
+        });
+
+        // Alphabet Filter Listener
+        document.querySelectorAll('#alphabetOptions .btn-abjad').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#alphabetOptions .btn-abjad').forEach(b => {
+                    b.className = "btn-abjad py-2.5 px-3 rounded-2xl border border-slate-200 text-xs font-bold transition-all text-slate-600 hover:bg-slate-50";
+                });
+                btn.className = "btn-abjad active py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all border-sky-500 bg-sky-50 text-sky-800";
+                state.alphabetRange = btn.dataset.range;
+                audioFX.playPop();
+            });
+        });
+
+        // Difficulty Listener
+        document.querySelectorAll('#difficultyOptions .btn-diff').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('#difficultyOptions .btn-diff').forEach(b => {
+                    b.className = "btn-diff w-full text-left p-3 rounded-2xl border border-slate-200 text-slate-700 flex items-center justify-between hover:bg-slate-50";
+                    b.querySelector('i').className = "fa-solid fa-circle-check text-slate-300";
+                });
+                btn.className = "btn-diff active w-full text-left p-3 rounded-2xl border border-emerald-500 bg-emerald-50 text-emerald-900 flex items-center justify-between";
+                btn.querySelector('i').className = "fa-solid fa-circle-check text-emerald-600";
+                state.difficulty = btn.dataset.diff;
+                audioFX.playPop();
+            });
+        });
+
+        /* ================= GAMEPLAY ENGINE ================= */
+        function startGame() {
+            let list = WORD_DATABASE.filter(w => {
+                // Category match
+                if (w.category !== state.selectedCategory.id) return false;
+
+                // Syllable Pattern match
+                if (state.syllablesPattern === "KVKV" && w.pattern !== "KVKV") return false;
+
+                // Alphabet Range match
+                const firstChar = w.word[0].toUpperCase();
+                if (state.alphabetRange === "A-G") return firstChar >= 'A' && firstChar <= 'G';
+                if (state.alphabetRange === "H-N") return firstChar >= 'H' && firstChar <= 'N';
+                if (state.alphabetRange === "O-Z") return firstChar >= 'O' && firstChar <= 'Z';
+                return true;
+            });
+
+            if (list.length === 0) {
+                // Fallback to all category words if filters are too strict
+                list = WORD_DATABASE.filter(w => w.category === state.selectedCategory.id);
+            }
+
+            state.filteredWords = list.sort(() => Math.random() - 0.5);
+            state.currentWordIdx = 0;
+
+            document.getElementById('totalWordsCount').innerText = state.filteredWords.length;
+            document.getElementById('badgeCat').innerText = state.selectedCategory.title;
+            document.getElementById('badgeDiff').innerText = state.difficulty === 'easy' ? 'Mudah' : (state.difficulty === 'medium' ? 'Sedang' : 'Sulit');
+
+            goToScreen('play');
+            loadWord(0);
+        }
+
+        function loadWord(index) {
+            if (index >= state.filteredWords.length) {
+                state.currentWordIdx = 0;
+                index = 0;
+            }
+
+            const wordObj = state.filteredWords[index];
+            state.activeWordObj = wordObj;
+            document.getElementById('currentWordIndex').innerText = index + 1;
+
+            document.getElementById('clueText').innerText = `"${wordObj.clue}"`;
+            document.getElementById('emojiHintContainer').innerHTML = wordObj.emoji;
+            document.getElementById('emojiHintContainer').classList.add('hidden');
+            document.getElementById('hintToggleText').innerText = "Tampilkan Bantuan Gambar (Emoji)";
+
+            const fullWord = wordObj.word.toLowerCase();
+            const letters = fullWord.split('');
+            const vowels = ['a', 'e', 'i', 'o', 'u'];
+
+            let targetSlots = [];
+
+            if (state.difficulty === 'easy') {
+                // Easy: Hide ONLY 1 Syllable (Clean 2-Syllable Chunk)
+                const hideFirstSyllable = Math.random() > 0.5;
+                const syl1Len = wordObj.syllables[0].length;
+                
+                letters.forEach((char, idx) => {
+                    const isMissing = hideFirstSyllable ? (idx < syl1Len) : (idx >= syl1Len);
+                    targetSlots.push({
+                        expected: char,
+                        isLocked: !isMissing,
+                        currentVal: !isMissing ? char : ''
+                    });
+                });
+
+            } else if (state.difficulty === 'medium') {
+                // Medium: Hide Vowels only
+                letters.forEach((char) => {
+                    const isVowel = vowels.includes(char);
+                    targetSlots.push({
+                        expected: char,
+                        isLocked: !isVowel,
+                        currentVal: !isVowel ? char : ''
+                    });
+                });
+            } else {
+                // Hard: All missing
+                letters.forEach((char) => {
+                    targetSlots.push({
+                        expected: char,
+                        isLocked: false,
+                        currentVal: ''
+                    });
+                });
+            }
+
+            state.targetSlotsState = targetSlots;
+            renderTargetSlots();
+
+            // Prepare letter bank tiles
+            const neededChars = targetSlots.filter(s => !s.isLocked).map(s => s.expected);
+            const allAbjad = "abcdefghijklmnopqrstuvwxyz".split('');
+            const distractors = [];
+            while (distractors.length < Math.max(3, 7 - neededChars.length)) {
+                const randChar = allAbjad[Math.floor(Math.random() * allAbjad.length)];
+                if (!neededChars.includes(randChar) && !distractors.includes(randChar)) {
+                    distractors.push(randChar);
+                }
+            }
+
+            const bankLetters = [...neededChars, ...distractors].sort(() => Math.random() - 0.5);
+            renderLetterBank(bankLetters);
+        }
+
+        function renderTargetSlots() {
+            const container = document.getElementById('targetSlotsContainer');
+            const labelsContainer = document.getElementById('syllableLabels');
+            container.innerHTML = '';
+            labelsContainer.innerHTML = '';
+
+            const syls = state.activeWordObj.syllables;
+            labelsContainer.innerHTML = `
+                <span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full font-bold">Suku Kata 1: <b>${syls[0].toUpperCase()}</b></span>
+                <span class="bg-teal-100 text-teal-800 px-3 py-1 rounded-full font-bold">Suku Kata 2: <b>${syls[1].toUpperCase()}</b></span>
+            `;
+
+            let cumulativeIdx = 0;
+
+            syls.forEach((syl, sylIdx) => {
+                const sylBox = document.createElement('div');
+                sylBox.className = "flex items-center gap-2 bg-slate-200/80 p-3 rounded-2xl border border-slate-300 shadow-inner";
+
+                for (let i = 0; i < syl.length; i++) {
+                    const slotIndex = cumulativeIdx;
+                    const slotData = state.targetSlotsState[slotIndex];
+
+                    const slotEl = document.createElement('div');
+                    slotEl.dataset.index = slotIndex;
+
+                    if (slotData.isLocked) {
+                        slotEl.className = "w-12 h-14 md:w-16 md:h-18 rounded-2xl bg-white border-2 border-slate-300 flex items-center justify-center font-game font-extrabold text-2xl md:text-3xl text-slate-700 shadow-sm";
+                        slotEl.innerText = slotData.expected.toUpperCase();
+                    } else {
+                        const hasVal = slotData.currentVal !== '';
+                        slotEl.className = `w-12 h-14 md:w-16 md:h-18 rounded-2xl border-2 border-dashed ${hasVal ? 'border-sky-500 bg-sky-50 text-sky-800 shadow-md' : 'border-teal-400 bg-white text-teal-300'} flex items-center justify-center font-game font-extrabold text-2xl md:text-3xl cursor-pointer transition-all hover:scale-105`;
+                        slotEl.innerText = hasVal ? slotData.currentVal.toUpperCase() : '?';
+
+                        if (hasVal) {
+                            slotEl.onclick = () => removeLetterFromSlot(slotIndex);
+                        }
+
+                        slotEl.ondragover = (e) => {
+                            e.preventDefault();
+                            slotEl.classList.add('drag-over');
+                        };
+                        slotEl.ondragleave = () => {
+                            slotEl.classList.remove('drag-over');
+                        };
+                        slotEl.ondrop = (e) => {
+                            e.preventDefault();
+                            slotEl.classList.remove('drag-over');
+                            if (state.draggedLetter) {
+                                placeLetterInSlot(slotIndex, state.draggedLetter.char);
+                            }
+                        };
+                    }
+
+                    sylBox.appendChild(slotEl);
+                    cumulativeIdx++;
+                }
+
+                container.appendChild(sylBox);
+
+                if (sylIdx < syls.length - 1) {
+                    const dash = document.createElement('span');
+                    dash.className = "font-game text-3xl font-extrabold text-slate-400 px-1";
+                    dash.innerText = "-";
+                    container.appendChild(dash);
+                }
+            });
+        }
+
+        function renderLetterBank(letters) {
+            const bankContainer = document.getElementById('letterBankContainer');
+            bankContainer.innerHTML = '';
+
+            letters.forEach((char) => {
+                const tile = document.createElement('div');
+                tile.className = "tile-tactile w-13 h-15 md:w-16 md:h-18 rounded-2xl text-white font-game font-extrabold text-2xl md:text-3xl flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-105 select-none";
+                tile.innerText = char.toUpperCase();
+                tile.draggable = true;
+
+                tile.ondragstart = () => {
+                    state.draggedLetter = { char };
+                    tile.classList.add('dragging');
+                };
+                tile.ondragend = () => {
+                    tile.classList.remove('dragging');
+                    state.draggedLetter = null;
+                };
+
+                tile.onclick = () => {
+                    const firstEmptyIdx = state.targetSlotsState.findIndex(s => !s.isLocked && s.currentVal === '');
+                    if (firstEmptyIdx !== -1) {
+                        placeLetterInSlot(firstEmptyIdx, char);
+                    }
+                };
+
+                bankContainer.appendChild(tile);
+            });
+        }
+
+        function placeLetterInSlot(slotIndex, char) {
+            audioFX.playPop();
+            state.targetSlotsState[slotIndex].currentVal = char;
+            renderTargetSlots();
+        }
+
+        function removeLetterFromSlot(slotIndex) {
+            audioFX.playPop();
+            state.targetSlotsState[slotIndex].currentVal = '';
+            renderTargetSlots();
+        }
+
+        function resetWordSlots() {
+            audioFX.playPop();
+            state.targetSlotsState.forEach(slot => {
+                if (!slot.isLocked) slot.currentVal = '';
+            });
+            renderTargetSlots();
+        }
+
+        function checkAnswer() {
+            const hasEmpty = state.targetSlotsState.some(s => !s.isLocked && s.currentVal === '');
+            if (hasEmpty) {
+                audioFX.playError();
+                const container = document.getElementById('targetSlotsContainer');
+                container.classList.add('animate-wobble');
+                setTimeout(() => container.classList.remove('animate-wobble'), 500);
+                return;
+            }
+
+            const userWord = state.targetSlotsState.map(s => s.currentVal).join('').toLowerCase();
+            const correctWord = state.activeWordObj.word.toLowerCase();
+
+            if (userWord === correctWord) {
+                audioFX.playSuccess();
+                state.score += 10;
+                document.getElementById('starScore').innerText = state.score;
+
+                launchConfetti();
+
+                document.getElementById('modalWord').innerText = state.activeWordObj.word;
+                document.getElementById('modalEmoji').innerText = state.activeWordObj.emoji;
+                document.getElementById('modalSyllables').innerText = `${state.activeWordObj.syllables[0]} - ${state.activeWordObj.syllables[1]}`;
+                document.getElementById('victoryModal').classList.remove('hidden');
+
+            } else {
+                audioFX.playError();
+                const container = document.getElementById('targetSlotsContainer');
+                container.classList.add('animate-wobble');
+                setTimeout(() => container.classList.remove('animate-wobble'), 500);
+            }
+        }
+
+        function nextWord() {
+            document.getElementById('victoryModal').classList.add('hidden');
+            state.currentWordIdx++;
+            loadWord(state.currentWordIdx);
+        }
+
+        function skipWord() {
+            audioFX.playPop();
+            state.currentWordIdx++;
+            loadWord(state.currentWordIdx);
+        }
+
+        function readClueAloud() {
+            if (!('speechSynthesis' in window)) {
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const text = state.activeWordObj.clue;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'id-ID';
+            utterance.rate = 0.82;
+            utterance.pitch = 1.1;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function toggleEmojiHint() {
+            const el = document.getElementById('emojiHintContainer');
+            const txt = document.getElementById('hintToggleText');
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                txt.innerText = "Sembunyikan Gambar (Emoji)";
+                audioFX.playPop();
+            } else {
+                el.classList.add('hidden');
+                txt.innerText = "Tampilkan Bantuan Gambar (Emoji)";
+            }
+        }
+
+        /* ================= CONFETTI CANVAS SYSTEM ================= */
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const particles = [];
+            const colors = ['#059669', '#0284c7', '#0d9488', '#4f46e5', '#f59e0b', '#ec4899'];
+
+            for (let i = 0; i < 75; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 16,
+                    vy: (Math.random() - 0.7) * 16,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 100
+                });
+            }
+
+            function animateConfetti() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                let alive = false;
+
+                particles.forEach(p => {
+                    if (p.life > 0) {
+                        alive = true;
+                        p.x += p.vx;
+                        p.y += p.vy;
+                        p.vy += 0.28;
+                        p.life--;
+
+                        ctx.fillStyle = p.color;
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                if (alive) {
+                    requestAnimationFrame(animateConfetti);
+                } else {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            }
+            animateConfetti();
+        }
+
+        window.onload = function() {
+            drawWheel();
+        };
+
+        window.onresize = function() {
+            if (state.screen === 'spin') {
+                drawWheel();
+            }
+        };
+    </script>
+</body>
+</html>
